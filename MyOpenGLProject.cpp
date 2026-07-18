@@ -76,19 +76,23 @@ int main() {
 		return -1;
 	}
 	/*-----------------------------------------------------------------------------------------------------------*/
-	glViewport(0, 0, 800, 600);//设置视口大小
-	//framebuffer_size_callback(window, 800, 600);//设置窗口大小回调函数
+	glViewport(0, 0, 800, 600);//设置视口大小，视口是OpenGL渲染的区域，前两个参数是视口左下角的坐标，后两个参数是视口的宽度，
+	//视口的大小应该与窗口的大小一致，这样渲染的图像才不会被拉伸或压缩，视口和窗口不是同的概念，视口是OpenGL渲染的区域，而窗口是操作系统提供的一个可视化界面，窗口可以包含多个视口
+
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);//注册窗口大小回调函数
+	//glfwSetWindowSize(window, 1600, 600);//设置窗口大小
+
 
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
 		processInput(window);//处理输入
 
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
+		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
+
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
-		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
 	}
 
 	/*在学习此节之前，建议将这三个单词先记下来：
@@ -117,7 +121,8 @@ int main() {
 
 	unsigned int vertexShader;//顶点着色器对象
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);//创建一个顶点着色器对象
-
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);//把顶点着色器源码附加到着色器对象上
+	glCompileShader(vertexShader);//编译顶点着色器
 
 
 	glfwTerminate();//终止GLFW
