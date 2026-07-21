@@ -102,19 +102,29 @@ int main() {
 	元素缓冲对象：Element Buffer Object，EBO 或 索引缓冲对象 Index Buffer Object，IBO*/
 
 	float vertices[] = {
-		-0.5f,-0.5f,0.0f,//左下角
-		0.5f,-0.5f,0.0f,//右下角
-		0.0f,0.5f,0.0f//上顶点
+		-0.5f,-0.5f,0.0f,  // 顶点0：左下角
+		 0.5f,-0.5f,0.0f,  // 顶点1：右下角
+		 0.5f, 0.5f,0.0f,  // 顶点2：右上角 
+		-0.5f, 0.5f,0.0f,  // 顶点3：左上角
 	};
 
+	unsigned int indices[] =
+	{
+		0, 3, 1,   // 第一个三角形：左下、右下、右上
+		3, 1, 2    // 第二个三角形：右上、左上、左下 
+	};
+
+	unsigned int EBO;//元素缓冲对象
 	unsigned int VAO;//顶点数组对象
 	unsigned int VBO;//顶点缓冲对象
-	glGenVertexArrays(1,&VAO);//生产一个顶点数组对象；
+	glGenVertexArrays(1, &VAO);//生产一个顶点数组对象；
+	glGenBuffers(1, &EBO);//生成一个元素缓冲对象
 	glGenBuffers(1, &VBO);//生成一个顶点缓冲对象
+	glBindVertexArray(VAO);//绑定顶点数组对象，绑定之后，后续的顶点属性配置和缓冲区对象的绑定都会储存在这个VAO中
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);//绑定顶点缓冲对象,gl_array_buffer是顶点缓冲对象的缓冲类型，VBO是顶点缓冲对象的ID
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);//把顶点数据复制到缓冲的内存中，GL_STATIC_DRAW是一个使用模式，表示数据不会或几乎不会改变
-	glBindVertexArray(VAO);//调用VAO配置
-
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);//绑定元素缓冲对象，gl_element_array_buffer是元素缓冲对象的缓冲类型，EBO是元素缓冲对象的ID
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);//把索引数据复制到缓冲的内存中，GL_STATIC_DRAW是一个使用模式，表示数据不会或几乎不会改变
 
 	unsigned int vertexShader;//顶点着色器对象
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);//创建一个顶点着色器对象
@@ -175,7 +185,8 @@ int main() {
 	glDeleteShader(vertexShader);//连接完成以后不需要之前的着色器
 	glDeleteShader(fragmentShader);
 
-
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);//绑定元素缓冲对象
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
 
 
 
@@ -189,7 +200,9 @@ int main() {
 
 		glUseProgram(shaderProgram);//调用着色器程序
 		glBindVertexArray(VAO);//调用配置
-		glDrawArrays(GL_TRIANGLES,0,3);//绘图
+		//glDrawArrays(GL_TRIANGLES,0,3);//绘图
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
+		glBindVertexArray(0);//解绑VAO
 
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
