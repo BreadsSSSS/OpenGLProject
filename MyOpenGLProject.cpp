@@ -7,6 +7,7 @@
 #include <LearnOpenGL/shader_s.h>
 
 using namespace std;
+#include <direct.h>
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) //自定义的窗口大小回调函数
@@ -50,37 +51,6 @@ const char* fragmentShaderSource2 = "#version 330 core\n"
 "}\n\0";
 
 int main() {
-	/*glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", NULL , NULL);
-	if (!window) {
-		std::cout << "窗口创建失败" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cout << "GLAD初始化失败" << std::endl;
-		return -1;
-	}
-
-	// 测试GLM
-	glm::vec3 pos(1.0f, 2.0f, 3.0f);
-	std::cout << "GLM正常：" << pos.x << std::endl;
-
-	while (!glfwWindowShouldClose(window)) {
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-	}
-
-	glfwTerminate();
-	return 0;*/
 
 	/*-----------------------------------------------------------------------------------------------------------*/
 	glfwInit();//初始化GLFW
@@ -105,9 +75,12 @@ int main() {
 	/*-----------------------------------------------------------------------------------------------------------*/
 	glViewport(0, 0, 800, 600);//设置视口大小，视口是OpenGL渲染的区域，前两个参数是视口左下角的坐标，后两个参数是视口的宽度，
 	//视口的大小应该与窗口的大小一致，这样渲染的图像才不会被拉伸或压缩，视口和窗口不是同的概念，视口是OpenGL渲染的区域，而窗口是操作系统提供的一个可视化界面，窗口可以包含多个视口
+	char buffer[256];
+	_getcwd(buffer, sizeof(buffer));
+	std::cout << "当前工作目录: " << buffer << std::endl;
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);//注册窗口大小回调函数
-
+	Shader ourShader("include/LearnOpenGL/shader.vs","include/LearnOpenGL/shader.fs");
 
 	/*在学习此节之前，建议将这三个单词先记下来：
 
@@ -249,25 +222,24 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
 		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
 
-		glUseProgram(shaderProgram);//调用着色器程序
+		//glUseProgram(shaderProgram);//调用着色器程序
 
-		float timeValue = glfwGetTime();//获取时间
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
+		//float timeValue = glfwGetTime();//获取时间
+		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
+		//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
 		//glUseProgram(shaderProgram);//使用着色器程序
-		glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);//设置uniform变量的值
+		//glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);//设置uniform变量的值
 		//第一个参数是uniform变量的位置，第二个参数是uniform变量的类型，第三个参数是uniform变量的值
 
 		glBindVertexArray(VAO);//调用配置
 		glDrawArrays(GL_TRIANGLES,0,3);//绘图
-
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
 		//glBindVertexArray(0);//解绑VAO
 
 		//glUseProgram(shaderProgram2);//调用着色器程序2
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
-
+		ourShader.use();
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
