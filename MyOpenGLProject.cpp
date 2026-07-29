@@ -228,9 +228,12 @@ int main() {
 		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
 		//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
 		//glUseProgram(shaderProgram);//使用着色器程序
-		//glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);//设置uniform变量的值
+	    //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);//设置uniform变量的值
 		//第一个参数是uniform变量的位置，第二个参数是uniform变量的类型，第三个参数是uniform变量的值
-
+		//float offset = 0.5f;
+		float timeValue = glfwGetTime();
+		float locationValue = (sin(timeValue) / 2.0f);
+		ourShader.setFloat("xOffset", locationValue);
 		glBindVertexArray(VAO);//调用配置
 		glDrawArrays(GL_TRIANGLES,0,3);//绘图
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
