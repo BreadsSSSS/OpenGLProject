@@ -1,4 +1,4 @@
-﻿#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -222,13 +222,12 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
 		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
 
-		//glUseProgram(shaderProgram);//调用着色器程序
+		glUseProgram(shaderProgram);//调用着色器程序
 
-		//float timeValue = glfwGetTime();//获取时间
-		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
-		//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
+		float timeValue = glfwGetTime();//获取时间
+		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
+		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
 		//glUseProgram(shaderProgram);//使用着色器程序
-	    //glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);//设置uniform变量的值
 		//第一个参数是uniform变量的位置，第二个参数是uniform变量的类型，第三个参数是uniform变量的值
 		//float offset = 0.5f;
 		float timeValue = glfwGetTime();
@@ -242,7 +241,7 @@ int main() {
 		//glUseProgram(shaderProgram2);//调用着色器程序2
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
-		ourShader.use();
+		//ourShader.use();
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
