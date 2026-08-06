@@ -1,13 +1,17 @@
 #define STB_IMAGE_IMPLEMENTATION
+using namespace std;
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <stb_image.h>
 #include <iostream>
 #include <LearnOpenGL/shader_s.h>
+#include <stb_image.h>
 
-using namespace std;
+
 #include <direct.h>
+#define NOMINMAX
+#include <windows.h>
+
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) //自定义的窗口大小回调函数
@@ -51,7 +55,8 @@ const char* fragmentShaderSource2 = "#version 330 core\n"
 "}\n\0";
 
 int main() {
-
+	
+	SetConsoleOutputCP(CP_UTF8);
 	/*-----------------------------------------------------------------------------------------------------------*/
 	glfwInit();//初始化GLFW
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);//定义使用OpenGL版本为3.3 主版本号
@@ -61,7 +66,7 @@ int main() {
 	GLFWwindow* window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);//用glfw（图形库）创建一个窗口对象
 	if (window == NULL)
 	{
-		cout << "Failed to create GLFW window" << endl;
+		std::cout << "Failed to create GLFW window" << endl;
 		glfwTerminate();//终止GLFW
 		return -1;
 	}
@@ -69,7 +74,7 @@ int main() {
 	/*-----------------------------------------------------------------------------------------------------------*/
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) //初始化GLAD，用于管理OpenGL的函数指针，用GLAD加载系统相关的OpenGL函数地址
 	{
-		cout << "Failed to initialize GLAD" << endl;
+		std::cout << "Failed to initialize GLAD" << endl;
 		return -1;
 	}
 	/*-----------------------------------------------------------------------------------------------------------*/
@@ -89,10 +94,11 @@ int main() {
 	元素缓冲对象：Element Buffer Object，EBO 或 索引缓冲对象 Index Buffer Object，IBO*/
 
 	float vertices[] = {
-		// 位置              // 颜色
-		 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // 右下
-		-0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // 左下
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // 顶部
+		// 位置              // 颜色               //纹理坐标
+		 0.5f,  0.5f, 0.0f,    1.0f, 0.0f, 0.0f,	1.0f,1.0f,	// 右上
+		 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,		1.0f,0.0f,	// 右下
+		 -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // 左下 
+		 -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // 左上 
 	};
 
 	float vertices2[] = {
@@ -105,6 +111,12 @@ int main() {
 	{
 		0, 3, 1,   // 第一个三角形
 		3, 1, 2    // 第二个三角形
+	};
+
+	float texCooders[] = {
+		0.0f,0.0f,
+		1.0f,0.0f,
+		0.5f,1.0f
 	};
 
 	unsigned int EBO;//元素缓冲对象
@@ -125,18 +137,21 @@ int main() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);//把索引数据复制到缓冲的内存中，GL_STATIC_DRAW是一个使用模式，表示数据不会或几乎不会改变
 	//第一个是layout(location =0),第二个是vector3顶点属性大小，第三个是数据类型，第四个是是否标准化
 	//第五个是步长，由3个float组成，第六个是偏移量
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);//解析顶点数据，设置顶点属性指针
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);//解析顶点数据，设置顶点属性指针
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));//解析顶点数据，设置顶点属性指针
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));//解析顶点数据，设置顶点属性指针
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 	glGenBuffers(1, &VBO2);//生成一个顶点缓冲对象2
 	glBindVertexArray(VAO2);//绑定顶点数组对象2
 	glBindBuffer(GL_ARRAY_BUFFER, VBO2);//绑定顶点缓冲对象2
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);//把顶点数据复制到缓冲的内存中，GL_STATIC_DRAW是一个使用模式，表示数据不会或几乎不会改变
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);//解析顶点数据，设置顶点属性指针
-	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(0);	
 
 
 	unsigned int vertexShader;//顶点着色器对象
@@ -211,9 +226,41 @@ int main() {
 
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);//获取最大顶点属性数量
-	cout << "最大顶点属性数量: " << nrAttributes << endl;
+	std::cout << "最大顶点属性数量: " << nrAttributes << endl;
 	
+	/*---------------------------------------------------------------------------------*/
 
+	int wide, height, nrChannels;//长、宽、颜色通道的个数；
+	unsigned char* data = stbi_load("include/container.jpg", &wide, &height, &nrChannels, 0);//长宽通过图片本身的数据反馈
+	unsigned int texture;
+	glGenTextures(1, &texture);//生成纹理
+	glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理目标
+	if (data)
+	{
+		//第一个参数为当前纹理目标，第二个为纹理级别，第三个为纹理储存格式，第七第八为原图格式和数据类型，最后为图像
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, wide, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+
+	//纹理过滤方式
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	//float borderColor[] = { 1.0f ,1.0f,0.0f,1.0f };
+	//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+	stbi_image_free(data);
 
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
@@ -222,26 +269,31 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
 		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
 
-		glUseProgram(shaderProgram);//调用着色器程序
+		//glUseProgram(shaderProgram);//调用着色器程序
 
-		float timeValue = glfwGetTime();//获取时间
-		float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
-		int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
+		//float timeValue = glfwGetTime();//获取时间
+		//float greenValue = (sin(timeValue) / 2.0f) + 0.5f;//计算绿色值
+		//int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");//获取uniform变量的位置
 		//glUseProgram(shaderProgram);//使用着色器程序
 		//第一个参数是uniform变量的位置，第二个参数是uniform变量的类型，第三个参数是uniform变量的值
 		//float offset = 0.5f;
-		float timeValue = glfwGetTime();
-		float locationValue = (sin(timeValue) / 2.0f);
-		ourShader.setFloat("xOffset", locationValue);
+		//float timeValue = glfwGetTime();
+		//float locationValue = (sin(timeValue) / 2.0f);
+		//ourShader.setFloat("xoffset", locationValue);
+		//float yoff = (cos(timeValue) / 2.0f);
+		//ourShader.setFloat("yoffset", yoff);
+		//ourShader.setFloat("time", timeValue);
+
+		//glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);//调用配置
-		glDrawArrays(GL_TRIANGLES,0,3);//绘图
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
+		//glDrawArrays(GL_TRIANGLES,0,3);//绘图
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
 		//glBindVertexArray(0);//解绑VAO
 
 		//glUseProgram(shaderProgram2);//调用着色器程序2
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
-		//ourShader.use();
+		ourShader.use();
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
