@@ -109,8 +109,8 @@ int main() {
 
 	unsigned int indices[] =
 	{
-		0, 3, 1,   // 第一个三角形
-		3, 1, 2    // 第二个三角形
+		0, 1, 3, // first triangle
+		1, 2, 3  // second triangle
 	};
 
 	float texCooders[] = {
@@ -143,7 +143,7 @@ int main() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));//解析顶点数据，设置顶点属性指针
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
 	glGenBuffers(1, &VBO2);//生成一个顶点缓冲对象2
@@ -231,10 +231,14 @@ int main() {
 	/*---------------------------------------------------------------------------------*/
 
 	int wide, height, nrChannels;//长、宽、颜色通道的个数；
+	stbi_set_flip_vertically_on_load(true);//反转图片
 	unsigned char* data = stbi_load("include/container.jpg", &wide, &height, &nrChannels, 0);//长宽通过图片本身的数据反馈
-	unsigned int texture;
-	glGenTextures(1, &texture);//生成纹理
-	glBindTexture(GL_TEXTURE_2D, texture);//绑定纹理目标
+	unsigned int texture1;
+	unsigned int texture2;
+
+	glGenTextures(1, &texture1);//生成纹理1
+	//glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture1);//绑定纹理目标
 	if (data)
 	{
 		//第一个参数为当前纹理目标，第二个为纹理级别，第三个为纹理储存格式，第七第八为原图格式和数据类型，最后为图像
@@ -245,6 +249,7 @@ int main() {
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
+
 
 	//纹理过滤方式
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
@@ -258,7 +263,22 @@ int main() {
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+	data = stbi_load("include/awesomeface.png", &wide, &height, &nrChannels, 0);
+	glGenTextures(1, &texture2);//生成纹理2
+	//glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, wide, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	ourShader.use();
+	ourShader.setInt("texture1", 0);
+	ourShader.setInt("texture2", 1);
 
 	stbi_image_free(data);
 
@@ -283,7 +303,13 @@ int main() {
 		//float yoff = (cos(timeValue) / 2.0f);
 		//ourShader.setFloat("yoffset", yoff);
 		//ourShader.setFloat("time", timeValue);
+		ourShader.use();
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture1);//绑定纹理目标
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture2);//绑定纹理目标
 		//glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);//调用配置
 		//glDrawArrays(GL_TRIANGLES,0,3);//绘图
@@ -293,7 +319,7 @@ int main() {
 		//glUseProgram(shaderProgram2);//调用着色器程序2
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
-		ourShader.use();
+		
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
