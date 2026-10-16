@@ -284,13 +284,16 @@ int main() {
 
 	stbi_image_free(data);
 
+	
+
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
 		processInput(window);//处理输入
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);//设置清空屏幕所用的颜色，这是一个状态设置函数，设置了之后，后续的glClear函数都会使用这个颜色来清空屏幕
 		glClear(GL_COLOR_BUFFER_BIT);//清空屏幕的颜色缓冲区，使用glClearColor设置的颜色来清空
-
+		ourShader.use();
+		glBindVertexArray(VAO);//调用配置
 		//glUseProgram(shaderProgram);//调用着色器程序
 
 		//float timeValue = glfwGetTime();//获取时间
@@ -305,7 +308,31 @@ int main() {
 		//float yoff = (cos(timeValue) / 2.0f);
 		//ourShader.setFloat("yoffset", yoff);
 		//ourShader.setFloat("time", timeValue);
-		ourShader.use();
+
+		glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+		//平移
+		glm::mat4 trans = glm::mat4(1.0f);//0.9.9以上版本需要矩阵初始化
+		//glm::mat4 trans; 古早版本可以不初始化
+		//trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+		//vec = trans * vec;
+		//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0f));
+		trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+		trans = glm::translate(trans, glm::vec3(1, -1.0f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+		/*-----------second box--------------*/
+		trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
+		float scaleAmount = static_cast<float>(sin(glfwGetTime()));
+		trans = glm::scale(trans, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+		transformLoc = glGetUniformLocation(ourShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture1);//绑定纹理目标
@@ -313,7 +340,7 @@ int main() {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);//绑定纹理目标
 		//glBindTexture(GL_TEXTURE_2D, texture);
-		glBindVertexArray(VAO);//调用配置
+		
 		//glDrawArrays(GL_TRIANGLES,0,3);//绘图
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//绘制图形，使用索引缓冲对象绘制两个三角形组成的矩形
 		//glBindVertexArray(0);//解绑VAO
@@ -322,6 +349,7 @@ int main() {
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
 		
+
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
 
