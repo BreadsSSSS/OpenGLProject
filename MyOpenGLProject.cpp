@@ -284,6 +284,16 @@ int main() {
 
 	stbi_image_free(data);
 
+	/*局部空间 --模型矩阵--> 世界空间 --观察矩阵--> 观察空间
+        --投影矩阵--> 裁剪空间 --透视除法/视口变换--> 屏幕空间*/
+
+	glm::mat4 model = glm::mat4(1.0f);//创建模型矩阵
+	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));//旋转弧度，绕X轴旋转
+	glm::mat4 view = glm::mat4(1.0f);;//创建观察矩阵
+	view = glm::translate(view, glm::vec3(0,0,-3.0f));
+	glm::mat4 projection = glm::mat4(1.0f);;//创建投影矩阵
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);//垂直的视野张角，高宽比避免画面被拉伸
+
 	
 
 	while (!glfwWindowShouldClose(window))//循环渲染
@@ -309,29 +319,35 @@ int main() {
 		//ourShader.setFloat("yoffset", yoff);
 		//ourShader.setFloat("time", timeValue);
 
-		glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+		unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		ourShader.setMat4("projection", projection);
+
+		//glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
 		//平移
-		glm::mat4 trans = glm::mat4(1.0f);//0.9.9以上版本需要矩阵初始化
+		//glm::mat4 trans = glm::mat4(1.0f);//0.9.9以上版本需要矩阵初始化
 		//glm::mat4 trans; 古早版本可以不初始化
 		//trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
 		//vec = trans * vec;
 		//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0, 0.0, 1.0f));
-		trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+		/*trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
 		trans = glm::translate(trans, glm::vec3(1, -1.0f, 0.0f));
 		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(1.0f, 0.0f, 0.0f));
 		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		unsigned int transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));*/
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		/*-----------second box--------------*/
-		trans = glm::mat4(1.0f);
+		/*trans = glm::mat4(1.0f);
 		trans = glm::translate(trans, glm::vec3(-0.5f, 0.5f, 0.0f));
 		float scaleAmount = static_cast<float>(sin(glfwGetTime()));
 		trans = glm::scale(trans, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
 		transformLoc = glGetUniformLocation(ourShader.ID, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));*/
 
 
 		glActiveTexture(GL_TEXTURE0);
@@ -348,7 +364,6 @@ int main() {
 		//glUseProgram(shaderProgram2);//调用着色器程序2
 		//glBindVertexArray(VAO2);//调用配置
 		//glDrawArrays(GL_TRIANGLES, 0, 3);//绘图
-		
 
 		glfwSwapBuffers(window);//缓冲区交换，在渲染循环中，先绘制到后台缓冲区，然后交换到前台显示
 		glfwPollEvents();//检查有没有触发什么事件（键盘输入、鼠标移动等）
