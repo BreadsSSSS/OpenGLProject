@@ -288,7 +288,7 @@ int main() {
         --投影矩阵--> 裁剪空间 --透视除法/视口变换--> 屏幕空间*/
 
 	glm::mat4 model = glm::mat4(1.0f);//创建模型矩阵
-	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));//旋转弧度，绕X轴旋转
+	model = glm::rotate(model, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f));//旋转弧度，绕X轴旋转
 	glm::mat4 view = glm::mat4(1.0f);;//创建观察矩阵
 	view = glm::translate(view, glm::vec3(0,0,-3.0f));
 	glm::mat4 projection = glm::mat4(1.0f);;//创建投影矩阵
@@ -319,10 +319,12 @@ int main() {
 		//ourShader.setFloat("yoffset", yoff);
 		//ourShader.setFloat("time", timeValue);
 
-		unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+		/*unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);*/
+		ourShader.setMat4("model", model);
+		ourShader.setMat4("view", view);
 		ourShader.setMat4("projection", projection);
 
 		//glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
