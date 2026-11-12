@@ -347,6 +347,10 @@ int main() {
   glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
 
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	
+	glm::vec3 cameraTarget = glm::
+
 	glEnable(GL_DEPTH_TEST);//开启Z-buffer缓冲；自动进行深度测试舍弃不必要的像素
 	while (!glfwWindowShouldClose(window))//循环渲染
 	{
